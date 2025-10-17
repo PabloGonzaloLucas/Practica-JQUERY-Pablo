@@ -3,15 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pracica</title>
+    <title>Practica</title>
+    <title>Practica</title>
 </head>
 <body>
-    
+    <h1>Práctica JQuery Pablo Gonzalo</h1>
+    <select id="selectCurso"></select>
+    <ul id="listaAlumnos"></ul>
+    <div id="contenedorImagen"></div>
     <script src="js/jquery-3.7.1.js"></script>
     <script>
+        let url= "https://apiejemplos.azurewebsites.net/";
         $(document).ready(function(){
+            loadCursos()
+            
+            $("#selectCurso").change(function(){
+                var curso = $("#selectCurso").val();
+                console.log(curso)
+                $("#contenedorImagen").html("")
+                let request = "api/Alumnos/FiltrarCurso/"+curso
+                $.ajax({
+                    url:url+request,
+                    dataType: "json",
+                    method: "GET",
+                    success: function(data){
+                        console.log(data)
+                        var html = ""
+                        $("#listaAlumnos").html("")
+                        $.each(data, function(index, alumno){
+                            console.log(alumno)
+                            var li = $("<li>", {value: alumno.idAlumno, text: alumno.nombre+" "+alumno.apellidos});
+                            li.appendTo($("#listaAlumnos"))
+                            var botonDetalles = $("<button>", {value: alumno.idAlumno, text: "Detalles"})
+                            botonDetalles.appendTo(li)
 
+                            botonDetalles.click(function(){
+                                let idAlumno = $(this).val()
+                                let request = "api/Alumnos/FindAlumno/"+idAlumno
+                                console.log(idAlumno)
+                                $.ajax({
+                                    url: url+request,
+                                    method: "GET",
+                                    dataType: "json",
+                                    success: function(data){
+                                        console.log(data)
+                                        var rutaImagen = data.imagen
+                                        var html = ""
+                                        html += "<h1>"+data.nombre+" "+data.apellidos+"</h1>"
+                                        html += "<h1>IdAlumno: "+idAlumno+"</h1>"
+                                        html += "<img src='"+rutaImagen+"'/>"
+                                        $("#contenedorImagen").html(html)
+                                        
+                                    }
+                                })
+                            })
+                        })
+                    }
+                })
+            })
         })
+
+        function loadCursos(){
+            var html = ""
+            let request = "api/Alumnos/Cursos"
+            $.ajax({
+                url: url+request,
+                dataType: "json",
+                method: "GET",
+                success: function(data){
+                    console.log(data)
+                    for(let i = 0; i< data.length; i++){
+                        html += "<option value='"+data[i]+"'>"+data[i]+"</option>"
+                    }
+                    $("#selectCurso").html(html)
+                }
+            })
+        }
 
     </script>
 </body>
